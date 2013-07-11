@@ -28,12 +28,16 @@ module DisplayCase
     # should be favored over other exhibits. By default, this is true
     attr_accessor :smart_matching
 
+    # A boolean indicating whether or not to log to the Rails logger
+    attr_accessor :logging_enabled
+
     def initialize
       @definition_file_paths = %w(app/exhibits)
       @explicit = false
       @exhibits = []
       @cache_store = nil
       @smart_matching = true
+      @logging_enabled = true
     end
 
     def explicit?
@@ -42,6 +46,10 @@ module DisplayCase
 
     def smart_matching?
       smart_matching
+    end
+
+    def logging_enabled?
+      defined? ::Rails and logging_enabled
     end
 
     def exhibits
