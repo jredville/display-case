@@ -29,12 +29,22 @@ module DisplayCase
         ::Rails.logger.debug "Exhibit context: #{context}"
       end
 
-      similar, unsimilar = exhibits.partition { |exhibit_class| context and exhibit_class.name and context.class.name and context.class.name.downcase.include?(exhibit_class.name.to_s.downcase.gsub("exhibit", "")) }
       object = BasicExhibit.new(Exhibited.new(object, context), context)
-      (unsimilar+similar).inject(object) do |object, exhibit_class|
+      sorted_exhibits(context).inject(object) do |object, exhibit_class|
           exhibit_class.exhibit_if_applicable(object, context)
       end.tap do |obj|
         ::Rails.logger.debug "Exhibits applied: #{obj.inspect_exhibits}" if defined? ::Rails
+      end
+    end
+
+    def self.sorted_exhibits(context)
+      if DisplayCase.configuration.smart_matching?
+        similar, unsimilar = exhibits.partition do |exhibit_class| 
+          context and exhibit_class.name and context.class.name and context.class.name.downcase.include?(exhibit_class.name.to_s.downcase.gsub("exhibit", ""))
+        end
+        unsimilar + similar
+      else
+        exhibits
       end
     end
 
@@ -69,7 +79,7 @@ module DisplayCase
 
         if defined? ::Rails
           config = ::Rails.respond_to?(:config) ? ::Rails.config : ::Rails.application.config
-          comparator = NameClassComparator.new unless config.cache_classes
+          comparator = NameClassComparator.new if config.cache_classes
         end
 
         comparator || IsAClassComparator.new

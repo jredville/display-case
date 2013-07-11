@@ -24,15 +24,24 @@ module DisplayCase
     # A cache store which responds to `fetch(key, options, &block)`
     attr_accessor :cache_store
 
+    # A boolean indicating whether Exhibits with names that are similar to the context
+    # should be favored over other exhibits. By default, this is true
+    attr_accessor :smart_matching
+
     def initialize
       @definition_file_paths = %w(app/exhibits)
       @explicit = false
       @exhibits = []
       @cache_store = nil
+      @smart_matching = true
     end
 
     def explicit?
       explicit
+    end
+
+    def smart_matching?
+      smart_matching
     end
 
     def exhibits
